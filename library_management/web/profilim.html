@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim | Kütüphane Yönetim Sistemi</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="profile">
+    <header>
+        <div class="nav-logo">Kütüphane</div>
+        <nav>
+            <a href="index.html" data-nav="books">Kitaplar</a>
+            <a href="yazarlar.html" data-nav="authors">Yazarlar</a>
+            <a href="profilim.html" data-nav="profile">Profilim</a>
+        </nav>
+        <div class="user-actions">
+            <span>Merhaba, Ziyaretçi</span>
+            <button class="secondary">Giriş Yap</button>
+            <button>Çıkış Yap</button>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="section-title">Profilim</h1>
+        <p>Kişisel kütüphane alanınıza hoş geldiniz. Aşağıdaki butonlar üzerinden işlemlerinizi kolayca yönetebilirsiniz.</p>
+
+        <section class="profile-grid" aria-label="Profil seçenekleri">
+            <article class="profile-card">
+                <h3>Ödünç Aldıklarım</h3>
+                <p>Aktif olarak ödünç aldığınız kitaplar burada listelenecek.</p>
+                <button type="button">Ödünç Aldıklarım</button>
+            </article>
+            <article class="profile-card">
+                <h3>Rezerve Ettiklerim</h3>
+                <p>Rezervasyon durumlarınızı bu alandan takip edebilirsiniz.</p>
+                <button type="button">Rezerve Ettiklerim</button>
+            </article>
+            <article class="profile-card">
+                <h3>Favorilerim</h3>
+                <p>Favori kitaplarınızı ve yazarlarınızı burada tutabilirsiniz.</p>
+                <button type="button">Favorilerim</button>
+            </article>
+            <article class="profile-card">
+                <h3>Hesap Bilgileri</h3>
+                <p>Hesap bilgilerinizi güncellemek için bu alanı kullanabilirsiniz.</p>
+                <button type="button">Hesap Bilgileri</button>
+            </article>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

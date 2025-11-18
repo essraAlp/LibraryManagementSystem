@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitaplar | Kütüphane Yönetim Sistemi</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="books">
+    <header>
+        <div class="nav-logo">Kütüphane</div>
+        <nav>
+            <a href="index.html" data-nav="books">Kitaplar</a>
+            <a href="yazarlar.html" data-nav="authors">Yazarlar</a>
+            <a href="profilim.html" data-nav="profile">Profilim</a>
+        </nav>
+        <div class="user-actions">
+            <span>Merhaba, Ziyaretçi</span>
+            <button class="secondary">Giriş Yap</button>
+            <button>Çıkış Yap</button>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="section-title">Kitaplar</h1>
+        <p>Bu alanda kütüphanemizde bulunan kitaplar görüntülenecek. Aşağıdaki örnekler, veritabanı bağlantısı tamamlandığında dinamik olarak güncellenecek.</p>
+
+        <section class="books-grid" aria-label="Kitaplar listesi">
+            <article class="book-card">
+                <h3>Kürk Mantolu Madonna</h3>
+                <p>Sabahattin Ali</p>
+                <p>Raif Efendi'nin iç dünyasını ve Maria Puder ile olan ilişkisini anlatan unutulmaz roman.</p>
+            </article>
+            <article class="book-card">
+                <h3>Simyacı</h3>
+                <p>Paulo Coelho</p>
+                <p>Hayallerinin peşinden giden Santiago'nun anlam arayışını konu edinen modern klasik.</p>
+            </article>
+            <article class="book-card">
+                <h3>Masumiyet Müzesi</h3>
+                <p>Orhan Pamuk</p>
+                <p>İstanbul'da geçen, aşk ve hatıra temaları üzerine kurulu derinlikli bir hikâye.</p>
+            </article>
+            <article class="book-card">
+                <h3>1984</h3>
+                <p>George Orwell</p>
+                <p>Totaliter bir rejimde yaşayan Winston Smith'in özgürlük arayışını konu alan distopya.</p>
+            </article>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
