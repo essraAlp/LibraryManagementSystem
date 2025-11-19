@@ -1,5 +1,4 @@
 import csv
-from django.conf import settings
 from user.models import User, Student, Staff
 
 STUDENT_CSV = "student.csv"

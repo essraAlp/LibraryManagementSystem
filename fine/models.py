@@ -1,5 +1,5 @@
 from django.db import models
-from user.models import User, Staff, Student
+from user.models import Staff, Student
 
 # Create your models here.
 class Fine(models.Model):
