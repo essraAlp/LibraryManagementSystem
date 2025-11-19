@@ -1,2 +1,8 @@
-"""Compatibility shim exposing project URL configuration."""
-from .library_management.urls import *  # noqa: F401,F403
+"""URL configuration for the library_management project."""
+
+from django.contrib import admin
+from django.urls import path
+
+urlpatterns = [
+	path("admin/", admin.site.urls),
+]
