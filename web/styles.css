@@ -1,0 +1,210 @@
+/* Base styles for the library web pages */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+    color: #1f2933;
+}
+
+header {
+    background-color: #1d3557;
+    color: #f1faee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-logo {
+    font-weight: 600;
+    font-size: 1.25rem;
+    letter-spacing: 0.05rem;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+nav a {
+    color: #f1faee;
+    text-decoration: none;
+    font-weight: 500;
+    position: relative;
+    padding-bottom: 4px;
+}
+
+nav a.active::after,
+nav a:hover::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #e63946;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-actions button {
+    background-color: #e63946;
+    color: #f1faee;
+    border: none;
+    border-radius: 20px;
+    padding: 0.35rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.user-actions button.secondary {
+    background-color: transparent;
+    border: 1px solid #f1faee;
+}
+
+main {
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.section-title {
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.book-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(29, 53, 87, 0.12);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.book-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.book-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #52606d;
+}
+
+.authors-wrapper {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 2rem;
+}
+
+.authors-list {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(29, 53, 87, 0.1);
+    padding: 1rem;
+}
+
+.authors-list button {
+    width: 100%;
+    text-align: left;
+    background-color: transparent;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.authors-list button:hover,
+.authors-list button:focus {
+    background-color: rgba(230, 57, 70, 0.15);
+}
+
+.author-books {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(29, 53, 87, 0.08);
+    padding: 1.5rem;
+    min-height: 220px;
+}
+
+.author-books h3 {
+    margin-top: 0;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.profile-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(29, 53, 87, 0.12);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.profile-card button {
+    align-self: flex-start;
+    background-color: #1d3557;
+    color: #f1faee;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        height: auto;
+        padding: 1rem;
+    }
+
+    nav {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .user-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    main {
+        padding: 1.5rem 1rem;
+    }
+
+    .authors-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
