@@ -1,4 +1,3 @@
-"""WSGI config for the library_management project."""
 
 import os
 

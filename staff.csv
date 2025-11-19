@@ -1,0 +1,11 @@
+﻿user_id,name,surname,email,phone,username,password
+1,Ahmet,Yılmaz,ahmet.yilmaz@library.com,5551234501,ahmety,staff1234
+2,Aylin,Kara,aylin.kara@library.com,5551234502,aylink,staff1234
+3,Mehmet,Çetin,mehmet.cetin@library.com,5551234503,mehmetc,staff1234
+4,Seda,Demir,seda.demir@library.com,5551234504,sedad,staff1234
+5,Burak,Şahin,burak.sahin@library.com,5551234505,buraks,staff1234
+6,Deniz,Arslan,deniz.arslan@library.com,5551234506,deniza,staff1234
+7,Elif,Öztürk,elif.ozturk@library.com,5551234507,elifoz,staff1234
+8,Serkan,Kurt,serkan.kurt@library.com,5551234508,serkank,staff1234
+9,Nur,Köse,nur.kose@library.com,5551234509,nurk,staff1234
+10,Tolga,Erdem,tolga.erdem@library.com,5551234510,tolgae,staff1234

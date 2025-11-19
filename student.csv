@@ -1,0 +1,11 @@
+﻿user_id,name,surname,email,phone,username,password
+101,Ece,Yıldız,ece.yildiz@student.com,5559876501,ecey,student123
+102,Kerem,Özkan,kerem.ozkan@student.com,5559876502,keremo,student123
+103,Zeynep,Koç,zeynep.koc@student.com,5559876503,zeynepk,student123
+104,Ali,Doğan,ali.dogan@student.com,5559876504,alid,student123
+105,Irem,Tuna,irem.tuna@student.com,5559876505,iremt,student123
+106,Mert,Baş,mert.bas@student.com,5559876506,mertb,student123
+107,Selin,Acar,selin.acar@student.com,5559876507,selina,student123
+108,Batuhan,Yüce,batuhan.yuce@student.com,5559876508,batuhany,student123
+109,Melisa,Yaman,melisa.yaman@student.com,5559876509,melisay,student123
+110,Yusuf,Kalkan,yusuf.kalkan@student.com,5559876510,yusufk,student123
