@@ -1,48 +1,93 @@
+import os
+import django
 import csv
-from user.models import User, Student, Staff
+from datetime import datetime
 
-STUDENT_CSV = "student.csv"
-STAFF_CSV = "staff.csv"
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LibraryManagementSystem.settings")
+django.setup()
 
-def run():
-    print("📌 Starting import...")
+from Books.models import Book  # kendi app adın neyse onu yaz
 
-    # ----- IMPORT STAFF -----
-    print("📘 Importing staff...")
-    with open(STAFF_CSV, newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            full_name = f"{row['name']} {row['surname']}"
+def normalize_year(year):
+    if not year or year.strip() == "":
+        return None
+    year = str(year).strip()
+    if year.isdigit() and len(year) == 4:
+        return f"{year}-01-01"
+    try:
+        datetime.fromisoformat(year)
+        return year
+    except:
+        return None
 
-            user = User.objects.create(
-                Name=full_name,
-                Email=row["email"],
-                Phone=row["phone"],
-                Username=row["username"],
-                Password=row["password"],
-                Type="staff"
-            )
 
-            Staff.objects.create(user=user)
-            print(f"✔ Added staff: {user.Name}")
+def load_books_from_csv(csv_path):
+    print(f"\n🚀 Başlıyor: {csv_path}\n")
 
-    # ----- IMPORT STUDENTS -----
-    print("\n📗 Importing students...")
-    with open(STUDENT_CSV, newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
+    if not os.path.exists(csv_path):
+        print("❌ CSV bulunamadı!")
+        return
 
-            full_name = f"{row['name']} {row['surname']}"
-            user = User.objects.create(
-                Name=full_name,
-                Email=row["email"],
-                Phone=row["phone"],
-                Username=row["username"],
-                Password=row["password"],
-                Type="student"
-            )
+    with open(csv_path, "r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
 
-            Student.objects.create(user=user)
-            print(f"✔ Added student: {user.Name}")
+        inserted = 0
+        skipped = 0
 
-    print("\n🎉 IMPORT FINISHED SUCCESSFULLY!")
+        for i, row in enumerate(reader, start=1):
+
+            print(f"\n========== SATIR {i} ==========")
+            print(row)
+
+            name = row.get("name")
+            isbn = row.get("ISBN")
+
+            if not isbn:
+                print(f"❌ Atlandı: ISBN boş")
+                skipped += 1
+                continue
+
+            isbn_str = isbn.strip()
+
+            if Book.objects.filter(ISBN=isbn_str).exists():
+                print(f"⏭ Atlandı: Duplicate ISBN → {isbn_str}")
+                skipped += 1
+                continue
+
+            year_value = normalize_year(row.get("publication_year"))
+
+            if year_value is None:
+                print(f"⚠ year null → year None olarak kaydedilecek")
+
+            try:
+                book = Book.objects.create(
+                    ISBN=isbn_str,
+                    name=row.get("name", "")[:200],
+                    explanation=row.get("explanation", ""),
+                    publisher=row.get("publisher", "")[:50],
+                    author=row.get("author", "")[:50],
+                    type=row.get("book_type", "")[:50],
+                    year=year_value,
+                    image=row.get("book_img", ""),
+                    status="available",
+                )
+
+                print(f"✅ EKLENDİ: {book.name}")
+                inserted += 1
+
+            except Exception as e:
+                print(f"❌ HATA: {e}")
+                skipped += 1
+
+
+    print("\n=========== ÖZET ===========")
+    print(f"📚 Eklenen kitap: {inserted}")
+    print(f"⚠ Atlanan kitap: {skipped}")
+    print("============================")
+
+
+if __name__ == "__main__":
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, "books.csv")
+
+    load_books_from_csv(csv_path)
