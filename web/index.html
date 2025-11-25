@@ -16,7 +16,7 @@
         </nav>
         <div class="user-actions">
             <span id="userGreeting">Merhaba, Ziyaretçi</span>
-            <button id="loginButton" class="secondary" onclick="showLoginModal()">Giriş Yap</button>
+            <button id="loginButton" class="secondary" onclick="showLoginModalWithClose()">Giriş Yap</button>
             <button id="logoutButton" style="display:none;" onclick="handleLogout()">Çıkış Yap</button>
         </div>
     </header>
@@ -41,7 +41,7 @@
     <!-- Login Modal -->
     <div id="loginModal" class="modal" style="display:none;">
         <div class="modal-content">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <span class="close" id="closeLoginBtn" onclick="closeLoginModal()" style="display:none;">&times;</span>
             <h2>Giriş Yap</h2>
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">

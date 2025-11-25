@@ -27,13 +27,27 @@ async function checkUserSession() {
         
         if (data.logged_in) {
             updateUIForLoggedInUser(data);
+            showMainContent();
         } else {
             updateUIForLoggedOutUser();
+            hideMainContentAndShowLogin();
         }
     } catch (error) {
         console.error('Session check failed:', error);
         updateUIForLoggedOutUser();
+        hideMainContentAndShowLogin();
     }
+}
+
+function showMainContent() {
+    const main = document.querySelector('main');
+    if (main) main.style.display = 'block';
+}
+
+function hideMainContentAndShowLogin() {
+    const main = document.querySelector('main');
+    if (main) main.style.display = 'none';
+    showLoginModal();
 }
 
 function updateUIForLoggedInUser(userData) {
@@ -44,6 +58,17 @@ function updateUIForLoggedInUser(userData) {
     if (greeting) greeting.textContent = `Merhaba, ${userData.name}`;
     if (loginBtn) loginBtn.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = 'inline-block';
+    
+    // Add staff panel link if user is staff
+    const nav = document.querySelector('nav');
+    if (userData.type === 'staff' && nav && !document.querySelector('[data-nav="staff"]')) {
+        const staffLink = document.createElement('a');
+        staffLink.href = 'staff_panel.html';
+        staffLink.setAttribute('data-nav', 'staff');
+        staffLink.textContent = 'Personel Paneli';
+        nav.appendChild(staffLink);
+        highlightActiveNav();
+    }
 }
 
 function updateUIForLoggedOutUser() {
@@ -54,15 +79,41 @@ function updateUIForLoggedOutUser() {
     if (greeting) greeting.textContent = 'Merhaba, Ziyaretçi';
     if (loginBtn) loginBtn.style.display = 'inline-block';
     if (logoutBtn) logoutBtn.style.display = 'none';
+    
+    // Remove staff panel link if exists
+    const staffLink = document.querySelector('[data-nav="staff"]');
+    if (staffLink) {
+        staffLink.remove();
+    }
 }
 
 function showLoginModal() {
-    document.getElementById('loginModal').style.display = 'block';
+    const modal = document.getElementById('loginModal');
+    const closeBtn = document.getElementById('closeLoginBtn');
+    modal.style.display = 'flex';
+    
+    // Show close button only if user is already logged out and manually opening
+    // Don't show it on initial page load when forcing login
+    if (closeBtn) {
+        closeBtn.style.display = 'none';
+    }
+}
+
+function showLoginModalWithClose() {
+    const modal = document.getElementById('loginModal');
+    const closeBtn = document.getElementById('closeLoginBtn');
+    modal.style.display = 'flex';
+    
+    if (closeBtn) {
+        closeBtn.style.display = 'block';
+    }
 }
 
 function closeLoginModal() {
-    document.getElementById('loginModal').style.display = 'none';
-    document.getElementById('loginError').style.display = 'none';
+    const modal = document.getElementById('loginModal');
+    const errorDiv = document.getElementById('loginError');
+    modal.style.display = 'none';
+    if (errorDiv) errorDiv.style.display = 'none';
 }
 
 async function handleLogin(event) {
@@ -84,9 +135,22 @@ async function handleLogin(event) {
         
         const data = await response.json();
         
+        console.log('Login response:', data); // Debug log
+        
         if (response.ok && data.success) {
             closeLoginModal();
+            
+            // Redirect staff to staff panel immediately
+            if (data.type === 'staff') {
+                console.log('Redirecting to staff panel...'); // Debug log
+                window.location.href = 'staff_panel.html';
+                return;
+            }
+            
+            // For students, update UI and show content
             updateUIForLoggedInUser(data);
+            showMainContent();
+            
             // Reload page if on profile page
             if (document.body.dataset.page === 'profile') {
                 location.reload();
@@ -110,12 +174,15 @@ async function handleLogout() {
         
         updateUIForLoggedOutUser();
         
-        // Redirect to books page if on profile page
-        if (document.body.dataset.page === 'profile') {
+        // Redirect to books page and show login modal
+        if (document.body.dataset.page === 'profile' || document.body.dataset.page === 'staff') {
             window.location.href = 'index.html';
+        } else {
+            // Hide content and show login modal after logout
+            hideMainContentAndShowLogin();
         }
     } catch (error) {
-        console.error('Logout failed:', error);
+        console.error('Logout error:', error);
     }
 }
 

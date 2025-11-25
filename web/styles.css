@@ -281,16 +281,23 @@ main {
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal[style*="display: flex"] {
+    display: flex !important;
 }
 
 .modal-content {
     background-color: #ffffff;
-    margin: 10% auto;
     padding: 2rem;
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
 .close {

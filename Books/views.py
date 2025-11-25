@@ -169,11 +169,154 @@ def book_list(request):
             'expected_return_date': availability_info['expected_return_date']
         })
     
-    return JsonResponse({
+    response = JsonResponse({
         'results': results, 
         'count': len(results),
         'total': total_count,
         'offset': offset,
         'has_more': (offset + limit) < total_count
     })
+    return add_cors_headers(response)
+
+
+def check_staff_permission(request):
+    """
+    Check if the logged-in user is staff.
+    Returns True if staff, False otherwise.
+    """
+    if 'user_id' not in request.session:
+        return False
+    
+    user_type = request.session.get('user_type')
+    return user_type == 'staff'
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def add_book(request):
+    """
+    Add a new book to the library. Staff only.
+    """
+    if request.method == 'OPTIONS':
+        response = JsonResponse({})
+        return add_cors_headers(response)
+    
+    if not check_staff_permission(request):
+        response = JsonResponse({'error': 'Permission denied. Staff only.'}, status=403)
+        return add_cors_headers(response)
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Validate required fields
+            required_fields = ['isbn', 'name', 'author', 'publisher', 'type']
+            for field in required_fields:
+                if not data.get(field):
+                    response = JsonResponse({'error': f'{field} is required'}, status=400)
+                    return add_cors_headers(response)
+            
+            # Check if book already exists
+            if Book.objects.filter(ISBN=data['isbn']).exists():
+                response = JsonResponse({'error': 'Book with this ISBN already exists'}, status=400)
+                return add_cors_headers(response)
+            
+            # Parse year if provided
+            year_obj = None
+            if data.get('year'):
+                try:
+                    from datetime import datetime
+                    year_obj = datetime.strptime(str(data['year']), '%Y').date()
+                except ValueError:
+                    response = JsonResponse({'error': 'Invalid year format. Use YYYY.'}, status=400)
+                    return add_cors_headers(response)
+            
+            # Create new book
+            book = Book.objects.create(
+                ISBN=data['isbn'],
+                name=data['name'],
+                author=data['author'],
+                publisher=data['publisher'],
+                type=data['type'],
+                year=year_obj,
+                explanation=data.get('explanation', ''),
+                image=data.get('image', ''),
+                status='available'
+            )
+            
+            response = JsonResponse({
+                'success': True,
+                'message': 'Book added successfully',
+                'book': {
+                    'isbn': book.ISBN,
+                    'name': book.name,
+                    'author': book.author,
+                    'publisher': book.publisher,
+                    'type': book.type,
+                    'year': book.year.strftime('%Y') if book.year else None,
+                    'explanation': book.explanation,
+                    'image': book.image,
+                    'status': book.status
+                }
+            })
+            return add_cors_headers(response)
+            
+        except json.JSONDecodeError:
+            response = JsonResponse({'error': 'Invalid JSON'}, status=400)
+            return add_cors_headers(response)
+        except Exception as e:
+            response = JsonResponse({'error': str(e)}, status=500)
+            return add_cors_headers(response)
+    
+    response = JsonResponse({'error': 'POST method required'}, status=405)
+    return add_cors_headers(response)
+
+
+@csrf_exempt
+def delete_book(request, isbn):
+    """
+    Delete a book from the library. Staff only.
+    Cannot delete if book has active borrows.
+    """
+    if request.method == 'OPTIONS':
+        response = JsonResponse({})
+        return add_cors_headers(response)
+    
+    if not check_staff_permission(request):
+        response = JsonResponse({'error': 'Permission denied. Staff only.'}, status=403)
+        return add_cors_headers(response)
+    
+    if request.method == 'DELETE':
+        try:
+            book = Book.objects.get(ISBN=isbn)
+            
+            # Check if book has active borrows
+            active_borrows = Borrow.objects.filter(
+                book=book,
+                status__in=['active', 'late']
+            ).count()
+            
+            if active_borrows > 0:
+                response = JsonResponse({
+                    'error': 'Cannot delete book with active borrows'
+                }, status=400)
+                return add_cors_headers(response)
+            
+            book.delete()
+            
+            response = JsonResponse({
+                'success': True,
+                'message': 'Book deleted successfully'
+            })
+            return add_cors_headers(response)
+            
+        except Book.DoesNotExist:
+            response = JsonResponse({'error': 'Book not found'}, status=404)
+            return add_cors_headers(response)
+        except Exception as e:
+            response = JsonResponse({'error': str(e)}, status=500)
+            return add_cors_headers(response)
+    
+    response = JsonResponse({'error': 'DELETE method required'}, status=405)
     return add_cors_headers(response)
