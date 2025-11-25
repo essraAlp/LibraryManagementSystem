@@ -15,39 +15,77 @@
             <a href="profilim.html" data-nav="profile">Profilim</a>
         </nav>
         <div class="user-actions">
-            <span>Merhaba, Ziyaretçi</span>
-            <button class="secondary">Giriş Yap</button>
-            <button>Çıkış Yap</button>
+            <span id="userGreeting">Merhaba, Ziyaretçi</span>
+            <button id="loginButton" class="secondary" onclick="showLoginModal()">Giriş Yap</button>
+            <button id="logoutButton" style="display:none;" onclick="handleLogout()">Çıkış Yap</button>
         </div>
     </header>
 
     <main>
         <h1 class="section-title">Profilim</h1>
-        <p>Kişisel kütüphane alanınıza hoş geldiniz. Aşağıdaki butonlar üzerinden işlemlerinizi kolayca yönetebilirsiniz.</p>
+        <div id="loginRequired" style="display:none;">
+            <p>Bu sayfayı görüntülemek için giriş yapmalısınız.</p>
+        </div>
 
-        <section class="profile-grid" aria-label="Profil seçenekleri">
-            <article class="profile-card">
-                <h3>Ödünç Aldıklarım</h3>
-                <p>Aktif olarak ödünç aldığınız kitaplar burada listelenecek.</p>
-                <button type="button">Ödünç Aldıklarım</button>
-            </article>
-            <article class="profile-card">
-                <h3>Rezerve Ettiklerim</h3>
-                <p>Rezervasyon durumlarınızı bu alandan takip edebilirsiniz.</p>
-                <button type="button">Rezerve Ettiklerim</button>
-            </article>
-            <article class="profile-card">
-                <h3>Favorilerim</h3>
-                <p>Favori kitaplarınızı ve yazarlarınızı burada tutabilirsiniz.</p>
-                <button type="button">Favorilerim</button>
-            </article>
-            <article class="profile-card">
-                <h3>Hesap Bilgileri</h3>
-                <p>Hesap bilgilerinizi güncellemek için bu alanı kullanabilirsiniz.</p>
-                <button type="button">Hesap Bilgileri</button>
-            </article>
-        </section>
+        <div id="profileContent" style="display:none;">
+            <!-- Borrowings Section -->
+            <section class="profile-section">
+                <h2>Ödünç Aldıklarım</h2>
+                <div id="borrowingsList">
+                    <p>Ödünç alma kayıtlarınız yükleniyor...</p>
+                </div>
+            </section>
+
+            <!-- Profile Information Section -->
+            <section class="profile-section">
+                <h2>Hesap Bilgileri</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>İsim:</label>
+                        <input type="text" id="userName" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>Kullanıcı Adı:</label>
+                        <input type="text" id="username" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta:</label>
+                        <input type="email" id="userEmail" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Telefon:</label>
+                        <input type="tel" id="userPhone" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Yeni Şifre (boş bırakılırsa değiştirilmez):</label>
+                        <input type="password" id="userPassword" />
+                    </div>
+                    <button type="submit">Bilgileri Güncelle</button>
+                </form>
+                <div id="updateMessage" style="display:none; margin-top:10px;"></div>
+            </section>
+        </div>
     </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>Giriş Yap</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Kullanıcı Adı:</label>
+                    <input type="text" id="loginUsername" required />
+                </div>
+                <div class="form-group">
+                    <label>Şifre:</label>
+                    <input type="password" id="loginPassword" required />
+                </div>
+                <button type="submit">Giriş</button>
+                <div id="loginError" style="color:red; display:none; margin-top:10px;"></div>
+            </form>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

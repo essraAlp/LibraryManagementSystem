@@ -48,12 +48,17 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# Session configuration
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
 ROOT_URLCONF = "library_management.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR.parent / "web"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -119,6 +124,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# Add web directory to static files
+STATICFILES_DIRS = [
+    BASE_DIR.parent / "web",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
