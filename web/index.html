@@ -15,39 +15,48 @@
             <a href="profilim.html" data-nav="profile">Profilim</a>
         </nav>
         <div class="user-actions">
-            <span>Merhaba, Ziyaretçi</span>
-            <button class="secondary">Giriş Yap</button>
-            <button>Çıkış Yap</button>
+            <span id="userGreeting">Merhaba, Ziyaretçi</span>
+            <button id="loginButton" class="secondary" onclick="showLoginModal()">Giriş Yap</button>
+            <button id="logoutButton" style="display:none;" onclick="handleLogout()">Çıkış Yap</button>
         </div>
     </header>
 
     <main>
         <h1 class="section-title">Kitaplar</h1>
-        <p>Bu alanda kütüphanemizde bulunan kitaplar görüntülenecek. Aşağıdaki örnekler, veritabanı bağlantısı tamamlandığında dinamik olarak güncellenecek.</p>
+        
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Kitap adı, yazar, tür veya yayınevi ile ara..." />
+            <button id="searchButton">Ara</button>
+            <button id="clearSearch" style="display:none;">Temizle</button>
+        </div>
+        
+        <p id="searchInfo">Tüm kitaplar gösteriliyor.</p>
 
-        <section class="books-grid" aria-label="Kitaplar listesi">
-            <article class="book-card">
-                <h3>Kürk Mantolu Madonna</h3>
-                <p>Sabahattin Ali</p>
-                <p>Raif Efendi'nin iç dünyasını ve Maria Puder ile olan ilişkisini anlatan unutulmaz roman.</p>
-            </article>
-            <article class="book-card">
-                <h3>Simyacı</h3>
-                <p>Paulo Coelho</p>
-                <p>Hayallerinin peşinden giden Santiago'nun anlam arayışını konu edinen modern klasik.</p>
-            </article>
-            <article class="book-card">
-                <h3>Masumiyet Müzesi</h3>
-                <p>Orhan Pamuk</p>
-                <p>İstanbul'da geçen, aşk ve hatıra temaları üzerine kurulu derinlikli bir hikâye.</p>
-            </article>
-            <article class="book-card">
-                <h3>1984</h3>
-                <p>George Orwell</p>
-                <p>Totaliter bir rejimde yaşayan Winston Smith'in özgürlük arayışını konu alan distopya.</p>
-            </article>
+        <section class="books-grid" id="booksGrid" aria-label="Kitaplar listesi">
+            <p>Kitaplar yükleniyor...</p>
         </section>
     </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>Giriş Yap</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Kullanıcı Adı:</label>
+                    <input type="text" id="loginUsername" required />
+                </div>
+                <div class="form-group">
+                    <label>Şifre:</label>
+                    <input type="password" id="loginPassword" required />
+                </div>
+                <button type="submit">Giriş</button>
+                <div id="loginError" style="color:red; display:none; margin-top:10px;"></div>
+            </form>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

@@ -208,3 +208,250 @@ main {
         grid-template-columns: 1fr;
     }
 }
+
+/* Search Container */
+.search-container {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.search-container input {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.75rem 1rem;
+    border: 2px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.search-container button {
+    background-color: #1d3557;
+    color: #f1faee;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.search-container button:hover {
+    background-color: #2d4567;
+}
+
+#searchInfo {
+    margin-bottom: 1rem;
+    color: #52606d;
+    font-style: italic;
+}
+
+/* Book availability badge */
+.availability-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.availability-badge.available {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.availability-badge.unavailable {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.expected-return {
+    font-size: 0.85rem;
+    color: #856404;
+    margin-top: 0.5rem;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #1f2933;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #1d3557;
+}
+
+form button[type="submit"] {
+    background-color: #1d3557;
+    color: #f1faee;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+form button[type="submit"]:hover {
+    background-color: #2d4567;
+}
+
+/* Profile Sections */
+.profile-section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(29, 53, 87, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.profile-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #1d3557;
+}
+
+/* Borrowing Card */
+.borrowing-card {
+    background-color: #f8f9fa;
+    border-left: 4px solid #1d3557;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+.borrowing-card.active {
+    border-left-color: #28a745;
+}
+
+.borrowing-card.late {
+    border-left-color: #dc3545;
+}
+
+.borrowing-card.returned {
+    border-left-color: #6c757d;
+}
+
+.borrowing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.75rem;
+}
+
+.borrowing-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.borrowing-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.borrowing-status.active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.borrowing-status.late {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.borrowing-status.returned {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.borrowing-details {
+    font-size: 0.95rem;
+    color: #52606d;
+    line-height: 1.6;
+}
+
+.borrowing-details strong {
+    color: #1f2933;
+}
+
+.fine-info {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-top: 0.75rem;
+}
+
+.fine-info.paid {
+    background-color: #d4edda;
+    border-color: #28a745;
+}
+
+.message-success {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #c3e6cb;
+}
+
+.message-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+}

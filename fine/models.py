@@ -1,5 +1,6 @@
 from django.db import models
 from user.models import Staff, Student
+from Barrow.models import Borrow
 
 # Create your models here.
 class Fine(models.Model):
@@ -7,6 +8,7 @@ class Fine(models.Model):
 
     Staff_ID = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='fines_as_staff')
     Student_ID = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='fines_as_student')
+    Borrow_ID = models.ForeignKey(Borrow, on_delete=models.CASCADE, related_name='fines', null=True, blank=True)
 
     Date = models.DateField()
 
@@ -15,5 +17,7 @@ class Fine(models.Model):
         ('unpaid', 'Unpaid'),
     )
     Status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    
+    Payment_Date = models.DateField(null=True, blank=True)
 
     Amount = models.FloatField()
