@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personel Paneli | Kütüphane Yönetim Sistemi</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .staff-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #2196F3;
+            background-color: #f5f5f5;
+        }
+
+        .tab.active {
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f5f5f5;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .badge-warning {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .badge-danger {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .badge-info {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1976D2;
+        }
+
+        .btn-success {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #388E3C;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #D32F2F;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .search-filter-bar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .search-filter-bar .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2196F3;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body data-page="staff">
+    <header>
+        <div class="nav-logo">Kütüphane</div>
+        <nav>
+            <a href="index.html">Kitaplar</a>
+            <a href="yazarlar.html">Yazarlar</a>
+            <a href="staff_panel.html" data-nav="staff" class="active">Personel Paneli</a>
+            <a href="profilim.html">Profilim</a>
+        </nav>
+        <div class="user-actions">
+            <span id="userGreeting">Merhaba, Personel</span>
+            <button id="logoutButton" onclick="handleLogout()">Çıkış Yap</button>
+        </div>
+    </header>
+
+    <main class="staff-container">
+        <h1 class="section-title">Personel Yönetim Paneli</h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('books')">Kitap Yönetimi</button>
+            <button class="tab" onclick="switchTab('borrows')">Ödünç İşlemleri</button>
+            <button class="tab" onclick="switchTab('late')">Gecikmiş Kitaplar</button>
+            <button class="tab" onclick="switchTab('fines')">Ceza Yönetimi</button>
+            <button class="tab" onclick="switchTab('members')">Üye Yönetimi</button>
+        </div>
+
+        <!-- Books Management Tab -->
+        <div id="books-tab" class="tab-content active">
+            <div class="section-header">
+                <h2>Kitap Yönetimi</h2>
+            </div>
+
+            <div class="form-container">
+                <h3>Yeni Kitap Ekle</h3>
+                <div id="bookAlert"></div>
+                <form id="addBookForm" onsubmit="handleAddBook(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>ISBN *</label>
+                            <input type="text" id="bookISBN" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Kitap Adı *</label>
+                            <input type="text" id="bookName" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Yazar *</label>
+                            <input type="text" id="bookAuthor" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Yayınevi *</label>
+                            <input type="text" id="bookPublisher" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Tür *</label>
+                            <input type="text" id="bookType" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Yıl</label>
+                            <input type="number" id="bookYear" min="1000" max="2100" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Açıklama</label>
+                        <textarea id="bookExplanation"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Resim URL</label>
+                        <input type="text" id="bookImage" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Kitap Ekle</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-filter-bar">
+                <div class="form-group">
+                    <label>Kitap Ara</label>
+                    <input type="text" id="bookSearchInput" placeholder="ISBN, ad, yazar ile ara..." />
+                </div>
+                <button class="btn btn-primary" onclick="searchBooksForDelete()">Ara</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ISBN</th>
+                            <th>Kitap Adı</th>
+                            <th>Yazar</th>
+                            <th>Yayınevi</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody">
+                        <tr><td colspan="6" class="empty-state">Kitap aramak için yukarıdaki arama çubuğunu kullanın</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Borrows Management Tab -->
+        <div id="borrows-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Ödünç İşlemleri</h2>
+            </div>
+
+            <div class="form-container">
+                <h3>Yeni Ödünç Kaydı</h3>
+                <div id="borrowAlert"></div>
+                <form id="addBorrowForm" onsubmit="handleAddBorrow(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Üye ID *</label>
+                            <input type="number" id="borrowStudentId" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Kitap ISBN *</label>
+                            <input type="text" id="borrowISBN" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Ödünç Tarihi *</label>
+                            <input type="date" id="borrowDate" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Teslim Tarihi *</label>
+                            <input type="date" id="dueDate" required />
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Ödünç Kaydı Oluştur</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-filter-bar">
+                <div class="form-group">
+                    <label>Durum Filtresi</label>
+                    <select id="borrowStatusFilter">
+                        <option value="">Tümü</option>
+                        <option value="active">Aktif</option>
+                        <option value="late">Gecikmiş</option>
+                        <option value="returned">İade Edilmiş</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Üye ID</label>
+                    <input type="number" id="borrowStudentFilter" placeholder="Üye ID" />
+                </div>
+                <button class="btn btn-primary" onclick="loadBorrows()">Filtrele</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Üye</th>
+                            <th>Kitap</th>
+                            <th>Ödünç Tarihi</th>
+                            <th>Teslim Tarihi</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="borrowsTableBody">
+                        <tr><td colspan="7" class="empty-state">Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Late Borrows Tab -->
+        <div id="late-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Gecikmiş Kitaplar</h2>
+                <button class="btn btn-primary" onclick="loadLateBorrows()">Listeyi Yenile</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Üye</th>
+                            <th>İletişim</th>
+                            <th>Kitap</th>
+                            <th>Teslim Tarihi</th>
+                            <th>Gecikme (Gün)</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lateTableBody">
+                        <tr><td colspan="7" class="empty-state">Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Fines Management Tab -->
+        <div id="fines-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Ceza Yönetimi</h2>
+            </div>
+
+            <div class="search-filter-bar">
+                <div class="form-group">
+                    <label>Durum Filtresi</label>
+                    <select id="fineStatusFilter">
+                        <option value="">Tümü</option>
+                        <option value="unpaid">Ödenmemiş</option>
+                        <option value="paid">Ödenmiş</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="loadFines()">Filtrele</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Üye</th>
+                            <th>Kitap</th>
+                            <th>Tarih</th>
+                            <th>Tutar (TL)</th>
+                            <th>Durum</th>
+                            <th>Ödeme Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="finesTableBody">
+                        <tr><td colspan="8" class="empty-state">Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Members Management Tab -->
+        <div id="members-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Üye Yönetimi</h2>
+            </div>
+
+            <div class="form-container">
+                <h3>Yeni Üye Ekle</h3>
+                <div id="memberAlert"></div>
+                <form id="addMemberForm" onsubmit="handleAddMember(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Ad Soyad *</label>
+                            <input type="text" id="memberName" required />
+                        </div>
+                        <div class="form-group">
+                            <label>E-posta *</label>
+                            <input type="email" id="memberEmail" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Telefon *</label>
+                            <input type="tel" id="memberPhone" required maxlength="10" />
+                        </div>
+                        <div class="form-group">
+                            <label>Kullanıcı Adı *</label>
+                            <input type="text" id="memberUsername" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre *</label>
+                            <input type="password" id="memberPassword" required />
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Üye Ekle</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-filter-bar">
+                <div class="form-group">
+                    <label>Üye Ara</label>
+                    <input type="text" id="memberSearchInput" placeholder="Ad, e-posta, telefon, kullanıcı adı ile ara..." />
+                </div>
+                <button class="btn btn-primary" onclick="searchMembers()">Ara</button>
+                <button class="btn btn-primary" onclick="loadAllMembers()">Tümünü Göster</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Telefon</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>Aktif Ödünç</th>
+                            <th>Ödenmemiş Ceza</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody">
+                        <tr><td colspan="8" class="empty-state">Üye aramak veya tümünü göstermek için yukarıdaki butonları kullanın</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        // Check if user is staff
+        async function checkStaffAccess() {
+            try {
+                const response = await fetch('http://localhost:8000/api/auth/session/', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (!data.logged_in || data.type !== 'staff') {
+                    alert('Bu sayfaya erişim yetkiniz yok. Personel girişi yapmalısınız.');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+                
+                document.getElementById('userGreeting').textContent = `Merhaba, ${data.name}`;
+                return true;
+            } catch (error) {
+                console.error('Session check error:', error);
+                window.location.href = 'index.html';
+                return false;
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Load data for the tab
+            if (tabName === 'borrows') {
+                loadBorrows();
+            } else if (tabName === 'late') {
+                loadLateBorrows();
+            } else if (tabName === 'fines') {
+                loadFines();
+            }
+        }
+
+        // Book Management Functions
+        async function handleAddBook(event) {
+            event.preventDefault();
+            
+            const bookData = {
+                isbn: document.getElementById('bookISBN').value,
+                name: document.getElementById('bookName').value,
+                author: document.getElementById('bookAuthor').value,
+                publisher: document.getElementById('bookPublisher').value,
+                type: document.getElementById('bookType').value,
+                year: document.getElementById('bookYear').value || null,
+                explanation: document.getElementById('bookExplanation').value,
+                image: document.getElementById('bookImage').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/staff/books/add/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(bookData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('bookAlert', 'Kitap başarıyla eklendi!', 'success');
+                    document.getElementById('addBookForm').reset();
+                } else {
+                    showAlert('bookAlert', data.error || 'Kitap eklenirken hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('bookAlert', 'Bağlantı hatası: ' + error.message, 'error');
+            }
+        }
+
+        async function searchBooksForDelete() {
+            const query = document.getElementById('bookSearchInput').value;
+            
+            if (!query) {
+                alert('Lütfen arama terimi girin');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/books/search/?q=${encodeURIComponent(query)}`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                const tbody = document.getElementById('booksTableBody');
+                tbody.innerHTML = '';
+                
+                if (data.results.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Kitap bulunamadı</td></tr>';
+                    return;
+                }
+                
+                data.results.forEach(book => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${book.isbn}</td>
+                        <td>${book.name}</td>
+                        <td>${book.author}</td>
+                        <td>${book.publisher}</td>
+                        <td><span class="badge badge-${getStatusBadgeClass(book.status)}">${getStatusText(book.status)}</span></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteBook('${book.isbn}')">Sil</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        }
+
+        async function deleteBook(isbn) {
+            if (!confirm('Bu kitabı silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/staff/books/delete/${isbn}/`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Kitap başarıyla silindi');
+                    searchBooksForDelete();
+                } else {
+                    alert(data.error || 'Kitap silinirken hata oluştu');
+                }
+            } catch (error) {
+                alert('Bağlantı hatası: ' + error.message);
+            }
+        }
+
+        // Borrow Management Functions
+        async function handleAddBorrow(event) {
+            event.preventDefault();
+            
+            const borrowData = {
+                student_id: document.getElementById('borrowStudentId').value,
+                isbn: document.getElementById('borrowISBN').value,
+                borrow_date: document.getElementById('borrowDate').value,
+                due_date: document.getElementById('dueDate').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/staff/borrows/create/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(borrowData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('borrowAlert', 'Ödünç kaydı başarıyla oluşturuldu!', 'success');
+                    document.getElementById('addBorrowForm').reset();
+                    loadBorrows();
+                } else {
+                    showAlert('borrowAlert', data.error || 'Ödünç kaydı oluşturulurken hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('borrowAlert', 'Bağlantı hatası: ' + error.message, 'error');
+            }
+        }
+
+        async function loadBorrows() {
+            const status = document.getElementById('borrowStatusFilter').value;
+            const studentId = document.getElementById('borrowStudentFilter').value;
+            
+            let url = 'http://localhost:8000/api/staff/borrows/?';
+            if (status) url += `status=${status}&`;
+            if (studentId) url += `student_id=${studentId}&`;
+            
+            try {
+                const response = await fetch(url, { credentials: 'include' });
+                const data = await response.json();
+                
+                const tbody = document.getElementById('borrowsTableBody');
+                tbody.innerHTML = '';
+                
+                if (data.results.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Ödünç kaydı bulunamadı</td></tr>';
+                    return;
+                }
+                
+                data.results.forEach(borrow => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${borrow.borrow_id}</td>
+                        <td>${borrow.student_name} (ID: ${borrow.student_id})</td>
+                        <td>${borrow.book_name}</td>
+                        <td>${borrow.borrow_date}</td>
+                        <td>${borrow.due_date}</td>
+                        <td><span class="badge badge-${getStatusBadgeClass(borrow.status)}">${getStatusText(borrow.status)}</span></td>
+                        <td>
+                            ${borrow.status !== 'returned' ? 
+                                `<button class="btn btn-success btn-sm" onclick="returnBook(${borrow.borrow_id})">İade Et</button>` : 
+                                '-'}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Load borrows error:', error);
+            }
+        }
+
+        async function returnBook(borrowId) {
+            if (!confirm('Bu kitabı iade olarak işaretlemek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/staff/borrows/return/${borrowId}/`, {
+                    method: 'PUT',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Kitap başarıyla iade edildi');
+                    loadBorrows();
+                } else {
+                    alert(data.error || 'İade işlemi sırasında hata oluştu');
+                }
+            } catch (error) {
+                alert('Bağlantı hatası: ' + error.message);
+            }
+        }
+
+        // Late Borrows Functions
+        async function loadLateBorrows() {
+            try {
+                const response = await fetch('http://localhost:8000/api/staff/borrows/late/', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                const tbody = document.getElementById('lateTableBody');
+                tbody.innerHTML = '';
+                
+                if (data.results.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Gecikmiş kitap bulunmuyor</td></tr>';
+                    return;
+                }
+                
+                data.results.forEach(borrow => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${borrow.borrow_id}</td>
+                        <td>${borrow.student_name}</td>
+                        <td>${borrow.student_email}<br>${borrow.student_phone}</td>
+                        <td>${borrow.book_name}<br><small>${borrow.book_author}</small></td>
+                        <td>${borrow.due_date}</td>
+                        <td><span class="badge badge-danger">${borrow.days_late}</span></td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="returnBook(${borrow.borrow_id})">İade Et</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Load late borrows error:', error);
+            }
+        }
+
+        // Fine Management Functions
+        async function loadFines() {
+            const status = document.getElementById('fineStatusFilter').value;
+            let url = 'http://localhost:8000/api/staff/fines/?';
+            if (status) url += `status=${status}`;
+            
+            try {
+                const response = await fetch(url, { credentials: 'include' });
+                const data = await response.json();
+                
+                const tbody = document.getElementById('finesTableBody');
+                tbody.innerHTML = '';
+                
+                if (data.results.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Ceza kaydı bulunamadı</td></tr>';
+                    return;
+                }
+                
+                data.results.forEach(fine => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${fine.fine_id}</td>
+                        <td>${fine.student_name}</td>
+                        <td>${fine.book_name || '-'}</td>
+                        <td>${fine.date}</td>
+                        <td>${fine.amount.toFixed(2)}</td>
+                        <td><span class="badge badge-${fine.status === 'paid' ? 'success' : 'danger'}">${fine.status === 'paid' ? 'Ödenmiş' : 'Ödenmemiş'}</span></td>
+                        <td>${fine.payment_date || '-'}</td>
+                        <td>
+                            ${fine.status === 'unpaid' ? 
+                                `<button class="btn btn-success btn-sm" onclick="markFinePaid(${fine.fine_id})">Ödendi</button>` : 
+                                '-'}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Load fines error:', error);
+            }
+        }
+
+        async function markFinePaid(fineId) {
+            if (!confirm('Bu cezayı ödenmiş olarak işaretlemek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/staff/fines/pay/${fineId}/`, {
+                    method: 'PUT',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Ceza ödenmiş olarak işaretlendi');
+                    loadFines();
+                } else {
+                    alert(data.error || 'İşlem sırasında hata oluştu');
+                }
+            } catch (error) {
+                alert('Bağlantı hatası: ' + error.message);
+            }
+        }
+
+        // Member Management Functions
+        async function handleAddMember(event) {
+            event.preventDefault();
+            
+            const memberData = {
+                name: document.getElementById('memberName').value,
+                email: document.getElementById('memberEmail').value,
+                phone: document.getElementById('memberPhone').value,
+                username: document.getElementById('memberUsername').value,
+                password: document.getElementById('memberPassword').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/staff/members/add/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(memberData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('memberAlert', 'Üye başarıyla eklendi!', 'success');
+                    document.getElementById('addMemberForm').reset();
+                } else {
+                    showAlert('memberAlert', data.error || 'Üye eklenirken hata oluştu', 'error');
+                }
+            } catch (error) {
+                showAlert('memberAlert', 'Bağlantı hatası: ' + error.message, 'error');
+            }
+        }
+
+        async function searchMembers() {
+            const query = document.getElementById('memberSearchInput').value;
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/staff/members/search/?q=${encodeURIComponent(query)}`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                displayMembers(data.results);
+            } catch (error) {
+                console.error('Search members error:', error);
+            }
+        }
+
+        async function loadAllMembers() {
+            try {
+                const response = await fetch('http://localhost:8000/api/staff/members/', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                displayMembers(data.results);
+            } catch (error) {
+                console.error('Load members error:', error);
+            }
+        }
+
+        function displayMembers(members) {
+            const tbody = document.getElementById('membersTableBody');
+            tbody.innerHTML = '';
+            
+            if (members.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Üye bulunamadı</td></tr>';
+                return;
+            }
+            
+            members.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${member.user_id}</td>
+                    <td>${member.name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone}</td>
+                    <td>${member.username}</td>
+                    <td>${member.active_borrows || 0}</td>
+                    <td>${member.unpaid_fines || 0}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.user_id})">Sil</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function deleteMember(userId) {
+            if (!confirm('Bu üyeyi silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/staff/members/delete/${userId}/`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Üye başarıyla silindi');
+                    loadAllMembers();
+                } else {
+                    alert(data.error || 'Üye silinirken hata oluştu');
+                }
+            } catch (error) {
+                alert('Bağlantı hatası: ' + error.message);
+            }
+        }
+
+        // Utility Functions
+        function showAlert(elementId, message, type) {
+            const alertDiv = document.getElementById(elementId);
+            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                'available': 'success',
+                'borrowed': 'info',
+                'late': 'danger',
+                'active': 'info',
+                'returned': 'success'
+            };
+            return classes[status] || 'info';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'available': 'Müsait',
+                'borrowed': 'Ödünçte',
+                'late': 'Gecikmiş',
+                'active': 'Aktif',
+                'returned': 'İade Edildi'
+            };
+            return texts[status] || status;
+        }
+
+        // Set today's date as default for date inputs
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('borrowDate').value = today;
+        
+        // Set due date to 14 days from today
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 14);
+        document.getElementById('dueDate').value = dueDate.toISOString().split('T')[0];
+
+        // Initialize page
+        checkStaffAccess();
+    </script>
+</body>
+</html>

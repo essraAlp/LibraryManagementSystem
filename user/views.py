@@ -243,3 +243,231 @@ def update_member_profile(request):
     except json.JSONDecodeError:
         response = JsonResponse({'error': 'Invalid JSON'}, status=400)
         return add_cors_headers(response)
+
+
+# Staff-only views for member management
+
+def check_staff_permission(request):
+    """Check if the logged-in user is staff."""
+    if 'user_id' not in request.session:
+        return False
+    user_type = request.session.get('user_type')
+    return user_type == 'staff'
+
+
+@csrf_exempt
+def add_member(request):
+    """
+    Add a new member (student). Staff only.
+    """
+    if request.method == 'OPTIONS':
+        response = JsonResponse({})
+        return add_cors_headers(response)
+    
+    if not check_staff_permission(request):
+        response = JsonResponse({'error': 'Permission denied. Staff only.'}, status=403)
+        return add_cors_headers(response)
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Validate required fields
+            required_fields = ['name', 'email', 'phone', 'username', 'password']
+            for field in required_fields:
+                if not data.get(field):
+                    response = JsonResponse({'error': f'{field} is required'}, status=400)
+                    return add_cors_headers(response)
+            
+            # Check if username already exists
+            if User.objects.filter(Username=data['username']).exists():
+                response = JsonResponse({'error': 'Username already exists'}, status=400)
+                return add_cors_headers(response)
+            
+            # Create user
+            user = User.objects.create(
+                Name=data['name'],
+                Email=data['email'],
+                Phone=data['phone'],
+                Username=data['username'],
+                Password=data['password'],  # In production, hash this
+                Type='student'
+            )
+            
+            # Create student record
+            student = Student.objects.create(user=user)
+            
+            response = JsonResponse({
+                'success': True,
+                'message': 'Member added successfully',
+                'member': {
+                    'user_id': user.User_ID,
+                    'name': user.Name,
+                    'email': user.Email,
+                    'phone': user.Phone,
+                    'username': user.Username
+                }
+            })
+            return add_cors_headers(response)
+            
+        except json.JSONDecodeError:
+            response = JsonResponse({'error': 'Invalid JSON'}, status=400)
+            return add_cors_headers(response)
+        except Exception as e:
+            response = JsonResponse({'error': str(e)}, status=500)
+            return add_cors_headers(response)
+    
+    response = JsonResponse({'error': 'POST method required'}, status=405)
+    return add_cors_headers(response)
+
+
+def search_members(request):
+    """
+    Search members by name, email, or phone. Staff only.
+    """
+    if not check_staff_permission(request):
+        response = JsonResponse({'error': 'Permission denied. Staff only.'}, status=403)
+        return add_cors_headers(response)
+    
+    query = request.GET.get('q', '').strip()
+    
+    if query:
+        from django.db.models import Q
+        users = User.objects.filter(
+            Type='student'
+        ).filter(
+            Q(Name__icontains=query) |
+            Q(Email__icontains=query) |
+            Q(Phone__icontains=query) |
+            Q(Username__icontains=query)
+        )
+    else:
+        # Return all students if no query
+        users = User.objects.filter(Type='student')
+    
+    results = []
+    for user in users:
+        results.append({
+            'user_id': user.User_ID,
+            'name': user.Name,
+            'email': user.Email,
+            'phone': user.Phone,
+            'username': user.Username
+        })
+    
+    response = JsonResponse({
+        'results': results,
+        'count': len(results)
+    })
+    return add_cors_headers(response)
+
+
+@csrf_exempt
+def delete_member(request, user_id):
+    """
+    Delete a member. Staff only.
+    Cannot delete if member has active borrows or unpaid fines.
+    """
+    if request.method == 'OPTIONS':
+        response = JsonResponse({})
+        return add_cors_headers(response)
+    
+    if not check_staff_permission(request):
+        response = JsonResponse({'error': 'Permission denied. Staff only.'}, status=403)
+        return add_cors_headers(response)
+    
+    if request.method == 'DELETE':
+        try:
+            user = User.objects.get(User_ID=user_id, Type='student')
+            student = Student.objects.get(user=user)
+            
+            # Check for active borrows
+            active_borrows = Borrow.objects.filter(
+                student=student,
+                status__in=['active', 'late']
+            ).count()
+            
+            if active_borrows > 0:
+                response = JsonResponse({
+                    'error': 'Cannot delete member with active borrows'
+                }, status=400)
+                return add_cors_headers(response)
+            
+            # Check for unpaid fines
+            unpaid_fines = Fine.objects.filter(
+                Student_ID=student,
+                Status='unpaid'
+            ).count()
+            
+            if unpaid_fines > 0:
+                response = JsonResponse({
+                    'error': 'Cannot delete member with unpaid fines'
+                }, status=400)
+                return add_cors_headers(response)
+            
+            # Delete student and user
+            student.delete()
+            user.delete()
+            
+            response = JsonResponse({
+                'success': True,
+                'message': 'Member deleted successfully'
+            })
+            return add_cors_headers(response)
+            
+        except User.DoesNotExist:
+            response = JsonResponse({'error': 'Member not found'}, status=404)
+            return add_cors_headers(response)
+        except Student.DoesNotExist:
+            response = JsonResponse({'error': 'Student record not found'}, status=404)
+            return add_cors_headers(response)
+        except Exception as e:
+            response = JsonResponse({'error': str(e)}, status=500)
+            return add_cors_headers(response)
+    
+    response = JsonResponse({'error': 'DELETE method required'}, status=405)
+    return add_cors_headers(response)
+
+
+def get_all_members(request):
+    """
+    Get all members with their statistics. Staff only.
+    """
+    if not check_staff_permission(request):
+        response = JsonResponse({'error': 'Permission denied. Staff only.'}, status=403)
+        return add_cors_headers(response)
+    
+    students = Student.objects.all().select_related('user')
+    
+    results = []
+    for student in students:
+        # Get statistics
+        active_borrows = Borrow.objects.filter(
+            student=student,
+            status__in=['active', 'late']
+        ).count()
+        
+        total_borrows = Borrow.objects.filter(student=student).count()
+        
+        unpaid_fines = Fine.objects.filter(
+            Student_ID=student,
+            Status='unpaid'
+        ).count()
+        
+        results.append({
+            'user_id': student.user.User_ID,
+            'name': student.user.Name,
+            'email': student.user.Email,
+            'phone': student.user.Phone,
+            'username': student.user.Username,
+            'active_borrows': active_borrows,
+            'total_borrows': total_borrows,
+            'unpaid_fines': unpaid_fines
+        })
+    
+    response = JsonResponse({
+        'results': results,
+        'count': len(results)
+    })
+    return add_cors_headers(response)
+
