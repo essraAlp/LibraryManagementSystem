@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Sum
 from .models import Borrow
 from Books.models import Book
 from user.models import Student, Staff, User
@@ -125,6 +126,30 @@ def create_borrow(request):
                 response = JsonResponse({'error': 'Book is not available'}, status=400)
                 return add_cors_headers(response)
             
+            # Check maximum book limit (5 books per student)
+            active_borrows_count = Borrow.objects.filter(
+                student=student,
+                status__in=['active', 'late']
+            ).count()
+            
+            if active_borrows_count >= 5:
+                response = JsonResponse({
+                    'error': 'Bu üye zaten 5 kitap ödünç almış. Maksimum kitap limitine ulaşıldı.'
+                }, status=400)
+                return add_cors_headers(response)
+            
+            # Check unpaid fines limit (100 TL maximum)
+            unpaid_fines_total = Fine.objects.filter(
+                Student_ID=student,
+                Status='unpaid'
+            ).aggregate(total=Sum('Amount'))['total'] or 0
+            
+            if unpaid_fines_total >= 100:
+                response = JsonResponse({
+                    'error': f'Bu üyenin ödenmemiş cezası {unpaid_fines_total} TL. Limit 100 TL. Önce cezalarını ödemesi gerekiyor.'
+                }, status=400)
+                return add_cors_headers(response)
+            
             # Parse dates
             try:
                 borrow_date = datetime.strptime(data['borrow_date'], '%Y-%m-%d').date()
@@ -136,6 +161,14 @@ def create_borrow(request):
             # Validate dates
             if due_date <= borrow_date:
                 response = JsonResponse({'error': 'Due date must be after borrow date'}, status=400)
+                return add_cors_headers(response)
+            
+            # Check maximum borrow duration (15 days)
+            borrow_duration = (due_date - borrow_date).days
+            if borrow_duration > 15:
+                response = JsonResponse({
+                    'error': 'Maksimum ödünç süresi 15 gündür. Lütfen daha kısa bir süre giriniz.'
+                }, status=400)
                 return add_cors_headers(response)
             
             # Create borrow record

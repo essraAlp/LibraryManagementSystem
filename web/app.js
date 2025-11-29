@@ -545,7 +545,7 @@ async function handleProfileUpdate(event) {
 
 // Password Change Modal Functions
 function showPasswordModal() {
-    document.getElementById('passwordModal').style.display = 'block';
+    document.getElementById('passwordModal').style.display = 'flex';
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
