@@ -11,7 +11,6 @@
         <div class="nav-logo">Kütüphane</div>
         <nav>
             <a href="index.html" data-nav="books">Kitaplar</a>
-            <a href="yazarlar.html" data-nav="authors">Yazarlar</a>
             <a href="profilim.html" data-nav="profile">Profilim</a>
         </nav>
         <div class="user-actions">
@@ -56,13 +55,14 @@
                         <label>Telefon:</label>
                         <input type="tel" id="userPhone" required />
                     </div>
-                    <div class="form-group">
-                        <label>Yeni Şifre (boş bırakılırsa değiştirilmez):</label>
-                        <input type="password" id="userPassword" />
-                    </div>
                     <button type="submit">Bilgileri Güncelle</button>
                 </form>
                 <div id="updateMessage" style="display:none; margin-top:10px;"></div>
+                
+                <!-- Password Change Button -->
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+                    <button onclick="showPasswordModal()" class="secondary">Şifre Değiştir</button>
+                </div>
             </section>
         </div>
     </main>
@@ -83,6 +83,31 @@
                 </div>
                 <button type="submit">Giriş</button>
                 <div id="loginError" style="color:red; display:none; margin-top:10px;"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closePasswordModal()">&times;</span>
+            <h2>Şifre Değiştir</h2>
+            <form id="passwordForm" onsubmit="handlePasswordChange(event)">
+                <div class="form-group">
+                    <label>Mevcut Şifre:</label>
+                    <input type="password" id="currentPassword" required />
+                </div>
+                <div class="form-group">
+                    <label>Yeni Şifre:</label>
+                    <input type="password" id="newPassword" required minlength="4" />
+                </div>
+                <div class="form-group">
+                    <label>Yeni Şifre (Tekrar):</label>
+                    <input type="password" id="confirmPassword" required minlength="4" />
+                </div>
+                <button type="submit">Şifre Değiştir</button>
+                <div id="passwordError" style="color:red; display:none; margin-top:10px;"></div>
+                <div id="passwordSuccess" style="color:green; display:none; margin-top:10px;"></div>
             </form>
         </div>
     </div>

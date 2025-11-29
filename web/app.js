@@ -508,13 +508,9 @@ async function handleProfileUpdate(event) {
     
     const email = document.getElementById('userEmail').value;
     const phone = document.getElementById('userPhone').value;
-    const password = document.getElementById('userPassword').value;
     const messageDiv = document.getElementById('updateMessage');
     
     const updateData = { email, phone };
-    if (password) {
-        updateData.password = password;
-    }
     
     try {
         const response = await fetch(`${API_BASE_URL}/member/profile/update/`, {
@@ -532,7 +528,9 @@ async function handleProfileUpdate(event) {
             messageDiv.className = 'message-success';
             messageDiv.textContent = 'Bilgileriniz başarıyla güncellendi!';
             messageDiv.style.display = 'block';
-            document.getElementById('userPassword').value = '';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
         } else {
             messageDiv.className = 'message-error';
             messageDiv.textContent = data.error || 'Güncelleme başarısız';
@@ -542,6 +540,80 @@ async function handleProfileUpdate(event) {
         messageDiv.className = 'message-error';
         messageDiv.textContent = 'Bağlantı hatası';
         messageDiv.style.display = 'block';
+    }
+}
+
+// Password Change Modal Functions
+function showPasswordModal() {
+    document.getElementById('passwordModal').style.display = 'flex';
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    document.getElementById('passwordError').style.display = 'none';
+    document.getElementById('passwordSuccess').style.display = 'none';
+}
+
+function closePasswordModal() {
+    document.getElementById('passwordModal').style.display = 'none';
+}
+
+async function handlePasswordChange(event) {
+    event.preventDefault();
+    
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const errorDiv = document.getElementById('passwordError');
+    const successDiv = document.getElementById('passwordSuccess');
+    
+    // Hide previous messages
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+    
+    // Validate new password confirmation
+    if (newPassword !== confirmPassword) {
+        errorDiv.textContent = 'Yeni şifreler eşleşmiyor!';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate password length
+    if (newPassword.length < 4) {
+        errorDiv.textContent = 'Şifre en az 4 karakter olmalıdır!';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/member/profile/update/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                password: newPassword,
+                current_password: currentPassword
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            successDiv.textContent = 'Şifreniz başarıyla değiştirildi!';
+            successDiv.style.display = 'block';
+            
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                closePasswordModal();
+            }, 2000);
+        } else {
+            errorDiv.textContent = data.error || 'Şifre değiştirme başarısız';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.textContent = 'Bağlantı hatası: ' + error.message;
+        errorDiv.style.display = 'block';
     }
 }
 

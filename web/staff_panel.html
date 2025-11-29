@@ -293,7 +293,6 @@
         <div class="nav-logo">Kütüphane</div>
         <nav>
             <a href="index.html">Kitaplar</a>
-            <a href="yazarlar.html">Yazarlar</a>
             <a href="staff_panel.html" data-nav="staff" class="active">Personel Paneli</a>
             <a href="profilim.html">Profilim</a>
         </nav>
@@ -725,12 +724,18 @@
             }
             
             try {
+                console.log('Deleting book with ISBN:', isbn);
                 const response = await fetch(`http://localhost:8000/api/staff/books/delete/${isbn}/`, {
                     method: 'DELETE',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
+                console.log('Delete response status:', response.status);
                 const data = await response.json();
+                console.log('Delete response data:', data);
                 
                 if (response.ok) {
                     alert('Kitap başarıyla silindi');
@@ -739,6 +744,7 @@
                     alert(data.error || 'Kitap silinirken hata oluştu');
                 }
             } catch (error) {
+                console.error('Delete error:', error);
                 alert('Bağlantı hatası: ' + error.message);
             }
         }
@@ -1022,7 +1028,7 @@
                     <td>${member.phone}</td>
                     <td>${member.username}</td>
                     <td>${member.active_borrows || 0}</td>
-                    <td>${member.unpaid_fines || 0}</td>
+                    <td>${typeof member.unpaid_fines === 'number' ? member.unpaid_fines.toFixed(2) + ' ₺' : '0.00 ₺'}</td>
                     <td>
                         <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.user_id})">Sil</button>
                     </td>
