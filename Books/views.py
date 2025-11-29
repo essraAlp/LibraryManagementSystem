@@ -11,11 +11,57 @@ import json
 
 logger = logging.getLogger(__name__)
 
+def update_late_borrows():
+    """Check and update overdue borrows to late status and create fines."""
+    from fine.models import Fine
+    from user.models import Staff
+    today = date.today()
+    
+    late_borrows = Borrow.objects.filter(
+        status='active',
+        last_date__lt=today
+    ).select_related('book', 'student')
+    
+    for borrow in late_borrows:
+        borrow.status = 'late'
+        borrow.save()
+        
+        if borrow.book.status != 'late':
+            borrow.book.status = 'late'
+            borrow.book.save()
+        
+        # Create or update fine for this borrow
+        days_late = (today - borrow.last_date).days
+        fine_amount = days_late * 5.0  # 5 TL per day
+        
+        existing_fine = Fine.objects.filter(Borrow_ID=borrow, Status='unpaid').first()
+        
+        if existing_fine:
+            # Update existing fine amount
+            existing_fine.Amount = fine_amount
+            existing_fine.Date = today
+            existing_fine.save()
+        else:
+            # Create new fine
+            try:
+                staff = Staff.objects.first()
+                if staff and borrow.student:
+                    Fine.objects.create(
+                        Staff_ID=staff,
+                        Student_ID=borrow.student,
+                        Borrow_ID=borrow,
+                        Date=today,
+                        Status='unpaid',
+                        Amount=fine_amount
+                    )
+            except Exception:
+                pass  # If no staff exists, skip fine creation
+
 def add_cors_headers(response):
     """Add CORS headers to response"""
     response['Access-Control-Allow-Origin'] = 'http://localhost:8080'
-    response['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response['Access-Control-Allow-Headers'] = 'Content-Type'
+    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+    response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     response['Access-Control-Allow-Credentials'] = 'true'
     return response
 
@@ -136,6 +182,9 @@ def book_list(request):
     Get all books with their availability status.
     Supports pagination with limit parameter.
     """
+    # Update late borrows when listing books
+    update_late_borrows()
+    
     # Get pagination parameters
     try:
         limit = int(request.GET.get('limit', 50))  # Default to 50 books

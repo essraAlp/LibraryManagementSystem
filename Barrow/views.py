@@ -10,11 +10,55 @@ import json
 
 # Create your views here.
 
+def update_late_borrows():
+    """Check and update overdue borrows to late status and create fines."""
+    today = date.today()
+    
+    late_borrows = Borrow.objects.filter(
+        status='active',
+        last_date__lt=today
+    ).select_related('book', 'student')
+    
+    for borrow in late_borrows:
+        borrow.status = 'late'
+        borrow.save()
+        
+        if borrow.book.status != 'late':
+            borrow.book.status = 'late'
+            borrow.book.save()
+        
+        # Create or update fine for this borrow
+        days_late = (today - borrow.last_date).days
+        fine_amount = days_late * 5.0  # 5 TL per day
+        
+        existing_fine = Fine.objects.filter(Borrow_ID=borrow, Status='unpaid').first()
+        
+        if existing_fine:
+            # Update existing fine amount
+            existing_fine.Amount = fine_amount
+            existing_fine.Date = today
+            existing_fine.save()
+        else:
+            # Create new fine
+            try:
+                staff = Staff.objects.first()
+                if staff and borrow.student:
+                    Fine.objects.create(
+                        Staff_ID=staff,
+                        Student_ID=borrow.student,
+                        Borrow_ID=borrow,
+                        Date=today,
+                        Status='unpaid',
+                        Amount=fine_amount
+                    )
+            except Exception:
+                pass  # If no staff exists, skip fine creation
+
 def add_cors_headers(response):
     """Add CORS headers to response"""
     response['Access-Control-Allow-Origin'] = 'http://localhost:8080'
-    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response['Access-Control-Allow-Headers'] = 'Content-Type'
+    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+    response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     response['Access-Control-Allow-Credentials'] = 'true'
     return response
 
@@ -42,6 +86,9 @@ def create_borrow(request):
     
     if request.method == 'POST':
         try:
+            # Update late borrows before creating new borrow
+            update_late_borrows()
+            
             data = json.loads(request.body)
             
             # Validate required fields
@@ -205,24 +252,15 @@ def get_late_borrows(request):
         response = JsonResponse({'error': 'Permission denied. Staff only.'}, status=403)
         return add_cors_headers(response)
     
+    # Update late borrows first
+    update_late_borrows()
+    
     today = date.today()
     
-    # Get all active borrows that are past due date
+    # Get all late borrows
     late_borrows = Borrow.objects.filter(
-        status__in=['active', 'late'],
-        last_date__lt=today
+        status='late'
     ).select_related('student__user', 'book', 'staff__user')
-    
-    # Update status to 'late' if not already
-    for borrow in late_borrows:
-        if borrow.status == 'active':
-            borrow.status = 'late'
-            borrow.save()
-            
-            # Update book status
-            if borrow.book.status != 'late':
-                borrow.book.status = 'late'
-                borrow.book.save()
     
     results = []
     for borrow in late_borrows:

@@ -16,7 +16,6 @@ urlpatterns = [
 	path("", TemplateView.as_view(template_name="index.html"), name="index"),
 	path("index.html", TemplateView.as_view(template_name="index.html"), name="index_html"),
 	path("profilim.html", TemplateView.as_view(template_name="profilim.html"), name="profile"),
-	path("yazarlar.html", TemplateView.as_view(template_name="yazarlar.html"), name="authors"),
 	path("staff_panel.html", TemplateView.as_view(template_name="staff_panel.html"), name="staff_panel"),
 	
 	# Book endpoints

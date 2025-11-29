@@ -6,9 +6,9 @@ from Barrow.models import Borrow
 class Fine(models.Model):
     Fine_ID = models.AutoField(primary_key=True)
 
-    Staff_ID = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='fines_as_staff')
-    Student_ID = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='fines_as_student')
-    Borrow_ID = models.ForeignKey(Borrow, on_delete=models.CASCADE, related_name='fines', null=True, blank=True)
+    Staff_ID = models.ForeignKey(Staff, on_delete=models.SET_NULL, related_name='fines_as_staff', null=True, blank=True)
+    Student_ID = models.ForeignKey(Student, on_delete=models.SET_NULL, related_name='fines_as_student', null=True, blank=True)
+    Borrow_ID = models.ForeignKey(Borrow, on_delete=models.SET_NULL, related_name='fines', null=True, blank=True)
 
     Date = models.DateField()
 
