@@ -281,13 +281,13 @@ main {
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.6);
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.modal[style*="display: flex"] {
-    display: flex !important;
+.modal[style*="display: none"] {
+    display: none !important;
 }
 
 .modal-content {
@@ -298,6 +298,18 @@ main {
     max-width: 500px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .close {

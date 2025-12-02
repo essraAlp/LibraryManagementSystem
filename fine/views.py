@@ -11,8 +11,8 @@ import json
 def add_cors_headers(response):
     """Add CORS headers to response"""
     response['Access-Control-Allow-Origin'] = 'http://localhost:8080'
-    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response['Access-Control-Allow-Headers'] = 'Content-Type'
+    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+    response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     response['Access-Control-Allow-Credentials'] = 'true'
     return response
 

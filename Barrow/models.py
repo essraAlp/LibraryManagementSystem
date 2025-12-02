@@ -15,9 +15,11 @@ class Borrow(models.Model):
     # Student_ID → member user
     student = models.ForeignKey(
         Student,
-        on_delete=models.PROTECT,   # öğrenci silinemez (aktif borrow varsa)
+        on_delete=models.SET_NULL,   # öğrenci silinirse null olur (tarihçe korunur)
         related_name="student_borrows",
-        limit_choices_to={'role': 'member'}
+        limit_choices_to={'role': 'member'},
+        null=True,
+        blank=True
     )
     # Book_ISBN
     book = models.ForeignKey(

@@ -5,15 +5,62 @@ from django.contrib.auth.hashers import check_password, make_password
 from .models import User, Student, Staff
 from Barrow.models import Borrow
 from fine.models import Fine
+from datetime import date
 import json
 
 # Create your views here.
 
+def update_late_borrows():
+    """Check and update overdue borrows to late status and create fines."""
+    from fine.models import Fine
+    today = date.today()
+    
+    late_borrows = Borrow.objects.filter(
+        status='active',
+        last_date__lt=today
+    ).select_related('book', 'student')
+    
+    for borrow in late_borrows:
+        borrow.status = 'late'
+        borrow.save()
+        
+        if borrow.book.status != 'late':
+            borrow.book.status = 'late'
+            borrow.book.save()
+        
+        # Create or update fine for this borrow
+        days_late = (today - borrow.last_date).days
+        fine_amount = days_late * 5.0  # 5 TL per day
+        
+        existing_fine = Fine.objects.filter(Borrow_ID=borrow, Status='unpaid').first()
+        
+        if existing_fine:
+            # Update existing fine amount
+            existing_fine.Amount = fine_amount
+            existing_fine.Date = today
+            existing_fine.save()
+        else:
+            # Create new fine
+            try:
+                from user.models import Staff
+                staff = Staff.objects.first()
+                if staff and borrow.student:
+                    Fine.objects.create(
+                        Staff_ID=staff,
+                        Student_ID=borrow.student,
+                        Borrow_ID=borrow,
+                        Date=today,
+                        Status='unpaid',
+                        Amount=fine_amount
+                    )
+            except Exception:
+                pass  # If no staff exists, skip fine creation
+
 def add_cors_headers(response):
     """Add CORS headers to response"""
     response['Access-Control-Allow-Origin'] = 'http://localhost:8080'
-    response['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response['Access-Control-Allow-Headers'] = 'Content-Type'
+    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+    response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     response['Access-Control-Allow-Credentials'] = 'true'
     return response
 
@@ -40,8 +87,11 @@ def login_view(request):
             try:
                 user = User.objects.get(Username=username)
                 
-                # Simple password check (you should use hashed passwords in production)
-                if user.Password == password:
+                # Check password securely using Django's check_password
+                if check_password(password, user.Password):
+                    # Update late borrows on login
+                    update_late_borrows()
+                    
                     # Store user info in session
                     request.session['user_id'] = user.User_ID
                     request.session['user_type'] = user.Type
@@ -91,6 +141,9 @@ def check_session(request):
     """
     if 'user_id' in request.session:
         try:
+            # Update late borrows on session check
+            update_late_borrows()
+            
             user = User.objects.get(User_ID=request.session['user_id'])
             response = JsonResponse({
                 'logged_in': True,
@@ -195,6 +248,7 @@ def get_member_profile(request):
 def update_member_profile(request):
     """
     Update member profile (email, phone, password only).
+    Password change requires current password verification.
     """
     # Handle OPTIONS preflight request
     if request.method == 'OPTIONS':
@@ -222,8 +276,25 @@ def update_member_profile(request):
         if 'phone' in data:
             user.Phone = data['phone']
         
+        # Password change requires current password verification
         if 'password' in data and data['password']:
-            user.Password = data['password']  # In production, hash this password
+            current_password = data.get('current_password')
+            
+            if not current_password:
+                response = JsonResponse({
+                    'error': 'Current password is required to change password'
+                }, status=400)
+                return add_cors_headers(response)
+            
+            # Verify current password
+            if not check_password(current_password, user.Password):
+                response = JsonResponse({
+                    'error': 'Current password is incorrect'
+                }, status=401)
+                return add_cors_headers(response)
+            
+            # Hash new password securely before saving
+            user.Password = make_password(data['password'])
         
         user.save()
         
@@ -284,13 +355,13 @@ def add_member(request):
                 response = JsonResponse({'error': 'Username already exists'}, status=400)
                 return add_cors_headers(response)
             
-            # Create user
+            # Create user with hashed password
             user = User.objects.create(
                 Name=data['name'],
                 Email=data['email'],
                 Phone=data['phone'],
                 Username=data['username'],
-                Password=data['password'],  # In production, hash this
+                Password=make_password(data['password']),  # Hash password securely
                 Type='student'
             )
             
@@ -347,13 +418,42 @@ def search_members(request):
     
     results = []
     for user in users:
-        results.append({
-            'user_id': user.User_ID,
-            'name': user.Name,
-            'email': user.Email,
-            'phone': user.Phone,
-            'username': user.Username
-        })
+        try:
+            student = Student.objects.get(user=user)
+            
+            # Get active borrows count
+            active_borrows = Borrow.objects.filter(
+                student=student,
+                status__in=['active', 'late']
+            ).count()
+            
+            # Get unpaid fines total amount
+            from django.db.models import Sum
+            unpaid_fines = Fine.objects.filter(
+                Student_ID=student,
+                Status='unpaid'
+            ).aggregate(total=Sum('Amount'))['total'] or 0
+            
+            results.append({
+                'user_id': user.User_ID,
+                'name': user.Name,
+                'email': user.Email,
+                'phone': user.Phone,
+                'username': user.Username,
+                'active_borrows': active_borrows,
+                'unpaid_fines': float(unpaid_fines)
+            })
+        except Student.DoesNotExist:
+            # If student record doesn't exist, still show the user
+            results.append({
+                'user_id': user.User_ID,
+                'name': user.Name,
+                'email': user.Email,
+                'phone': user.Phone,
+                'username': user.Username,
+                'active_borrows': 0,
+                'unpaid_fines': 0
+            })
     
     response = JsonResponse({
         'results': results,
@@ -441,7 +541,7 @@ def get_all_members(request):
     
     results = []
     for student in students:
-        # Get statistics
+        # Get active borrows count
         active_borrows = Borrow.objects.filter(
             student=student,
             status__in=['active', 'late']
@@ -449,10 +549,12 @@ def get_all_members(request):
         
         total_borrows = Borrow.objects.filter(student=student).count()
         
+        # Get unpaid fines total amount
+        from django.db.models import Sum
         unpaid_fines = Fine.objects.filter(
             Student_ID=student,
             Status='unpaid'
-        ).count()
+        ).aggregate(total=Sum('Amount'))['total'] or 0
         
         results.append({
             'user_id': student.user.User_ID,
@@ -462,7 +564,7 @@ def get_all_members(request):
             'username': student.user.Username,
             'active_borrows': active_borrows,
             'total_borrows': total_borrows,
-            'unpaid_fines': unpaid_fines
+            'unpaid_fines': float(unpaid_fines)
         })
     
     response = JsonResponse({

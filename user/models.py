@@ -12,7 +12,7 @@ class User(models.Model):
     Email = models.CharField(max_length=50)
     Phone = models.CharField(max_length=10)
     Username = models.CharField(max_length=50)
-    Password = models.CharField(max_length=50)
+    Password = models.CharField(max_length=128)  # Increased for hashed passwords
 
     Type = models.CharField(max_length=10, choices=USER_TYPES)
 
