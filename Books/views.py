@@ -369,3 +369,38 @@ def delete_book(request, isbn):
     
     response = JsonResponse({'error': 'DELETE method required'}, status=405)
     return add_cors_headers(response)
+
+
+def get_book_detail(request, isbn):
+    """
+    Get detailed information about a specific book including full explanation and image.
+    """
+    try:
+        book = Book.objects.get(ISBN=isbn)
+        
+        # Get availability information
+        availability_info = get_book_availability(book.ISBN)
+        
+        book_data = {
+            'isbn': book.ISBN,
+            'name': book.name,
+            'author': book.author,
+            'publisher': book.publisher,
+            'type': book.type,
+            'year': book.year.strftime('%Y') if book.year else None,
+            'explanation': book.explanation,  # Full explanation
+            'image': book.image,
+            'status': book.status,
+            'available': availability_info['available'],
+            'expected_return_date': availability_info['expected_return_date']
+        }
+        
+        response = JsonResponse(book_data)
+        return add_cors_headers(response)
+        
+    except Book.DoesNotExist:
+        response = JsonResponse({'error': 'Book not found'}, status=404)
+        return add_cors_headers(response)
+    except Exception as e:
+        response = JsonResponse({'error': str(e)}, status=500)
+        return add_cors_headers(response)

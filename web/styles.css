@@ -474,3 +474,109 @@ form button[type="submit"]:hover {
     border-radius: 6px;
     border: 1px solid #f5c6cb;
 }
+
+/* Show More Button */
+.show-more-btn {
+    background-color: #1d3557;
+    color: #f1faee;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.show-more-btn:hover {
+    background-color: #2d4567;
+}
+
+.book-explanation {
+    color: #52606d;
+    line-height: 1.5;
+}
+
+/* Book Detail Modal */
+.modal-book-detail {
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.book-detail-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.book-detail-image {
+    width: auto;
+    max-width: 250px;
+    height: auto;
+    max-height: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin: 0 auto;
+    display: block;
+    object-fit: contain;
+}
+
+.book-detail-info {
+    flex: 1;
+}
+
+.book-detail-info h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #1d3557;
+    font-size: 1.75rem;
+}
+
+.book-detail-info p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    color: #1f2933;
+}
+
+.book-detail-info strong {
+    color: #1d3557;
+}
+
+.book-full-explanation {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+.book-full-explanation h3 {
+    color: #1d3557;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.book-full-explanation p {
+    line-height: 1.8;
+    color: #52606d;
+    text-align: justify;
+}
+
+/* Responsive Design for Book Detail Modal */
+@media (min-width: 768px) {
+    .book-detail-container {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .book-detail-image {
+        max-width: 250px;
+        max-height: 500px;
+        margin: 0;
+        flex-shrink: 0;
+    }
+    
+    .book-detail-info {
+        flex: 1;
+        min-width: 0;
+    }
+}
+

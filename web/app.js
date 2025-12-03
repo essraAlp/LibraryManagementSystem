@@ -367,14 +367,24 @@ function displayBooks(books) {
             ? `<p class="expected-return">Beklenen iade tarihi: ${formatDate(book.expected_return_date)}</p>`
             : '';
         
+        // Truncate explanation to first 50 characters
+        const explanation = book.explanation || '';
+        const truncatedExplanation = explanation.length > 50 
+            ? explanation.substring(0, 50) + '...' 
+            : explanation;
+        const showMoreButton = explanation.length > 50 
+            ? `<button class="show-more-btn" onclick="showBookDetail('${book.isbn}')">Devamını Oku</button>` 
+            : '';
+        
         return `
-            <article class="book-card">
+            <article class="book-card" data-isbn="${book.isbn}">
                 <h3>${escapeHtml(book.name)}</h3>
                 <p><strong>Yazar:</strong> ${escapeHtml(book.author)}</p>
                 <p><strong>Yayınevi:</strong> ${escapeHtml(book.publisher)}</p>
                 <p><strong>Tür:</strong> ${escapeHtml(book.type)}</p>
                 ${book.year ? `<p><strong>Yıl:</strong> ${book.year}</p>` : ''}
-                <p>${escapeHtml(book.explanation)}</p>
+                <p class="book-explanation">${escapeHtml(truncatedExplanation)}</p>
+                ${showMoreButton}
                 ${availabilityBadge}
                 ${returnDate}
             </article>
@@ -618,6 +628,69 @@ async function handlePasswordChange(event) {
 }
 
 // ===== Utility Functions =====
+
+async function showBookDetail(isbn) {
+    const modal = document.getElementById('bookDetailModal');
+    const modalContent = document.getElementById('bookDetailContent');
+    
+    // Show modal with loading message
+    modal.style.display = 'flex';
+    modalContent.innerHTML = '<p>Yükleniyor...</p>';
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/books/${encodeURIComponent(isbn)}/`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const book = await response.json();
+        
+        // Display full book details in modal
+        const availabilityBadge = book.available 
+            ? '<span class="availability-badge available">Mevcut</span>'
+            : '<span class="availability-badge unavailable">Ödünç Verilmiş</span>';
+        
+        const returnDate = !book.available && book.expected_return_date
+            ? `<p class="expected-return"><strong>Beklenen iade tarihi:</strong> ${formatDate(book.expected_return_date)}</p>`
+            : '';
+        
+        const bookImage = book.image 
+            ? `<img src="${escapeHtml(book.image)}" alt="${escapeHtml(book.name)}" class="book-detail-image" onerror="this.style.display='none'">` 
+            : '';
+        
+        modalContent.innerHTML = `
+            <div class="book-detail-container">
+                ${bookImage}
+                <div class="book-detail-info">
+                    <h2>${escapeHtml(book.name)}</h2>
+                    <p><strong>Yazar:</strong> ${escapeHtml(book.author)}</p>
+                    <p><strong>Yayınevi:</strong> ${escapeHtml(book.publisher)}</p>
+                    <p><strong>Tür:</strong> ${escapeHtml(book.type)}</p>
+                    ${book.year ? `<p><strong>Yıl:</strong> ${book.year}</p>` : ''}
+                    <p><strong>ISBN:</strong> ${escapeHtml(book.isbn)}</p>
+                    ${availabilityBadge}
+                    ${returnDate}
+                    <div class="book-full-explanation">
+                        <h3>Açıklama</h3>
+                        <p>${escapeHtml(book.explanation)}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Failed to load book details:', error);
+        modalContent.innerHTML = '<p>Kitap detayları yüklenirken bir hata oluştu.</p>';
+    }
+}
+
+function closeBookDetailModal() {
+    const modal = document.getElementById('bookDetailModal');
+    modal.style.display = 'none';
+}
 
 function highlightActiveNav() {
     const currentPage = document.body.dataset.page;

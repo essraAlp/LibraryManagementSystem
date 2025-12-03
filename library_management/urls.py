@@ -20,6 +20,7 @@ urlpatterns = [
 	
 	# Book endpoints
 	path("api/books/search/", book_views.search_books, name="search_books"),
+	path("api/books/<str:isbn>/", book_views.get_book_detail, name="book_detail"),
 	path("api/books/", book_views.book_list, name="book_list"),
 	
 	# User authentication endpoints
