@@ -12,37 +12,42 @@ import json
 logger = logging.getLogger(__name__)
 
 def update_late_borrows():
-    """Check and update overdue borrows to late status and create fines."""
+    """Check and update overdue borrows to late status and create/update fines."""
     from fine.models import Fine
     from user.models import Staff
     today = date.today()
     
+    # Get ALL overdue borrows (both active and already late status)
     late_borrows = Borrow.objects.filter(
-        status='active',
+        status__in=['active', 'late'],
         last_date__lt=today
     ).select_related('book', 'student')
     
     for borrow in late_borrows:
-        borrow.status = 'late'
-        borrow.save()
+        # Update status to late if it's still active
+        if borrow.status == 'active':
+            borrow.status = 'late'
+            borrow.save()
         
+        # Update book status to late if not already
         if borrow.book.status != 'late':
             borrow.book.status = 'late'
             borrow.book.save()
         
-        # Create or update fine for this borrow
+        # Calculate current fine amount
         days_late = (today - borrow.last_date).days
         fine_amount = days_late * 5.0  # 5 TL per day
         
+        # Find existing unpaid fine for this borrow
         existing_fine = Fine.objects.filter(Borrow_ID=borrow, Status='unpaid').first()
         
         if existing_fine:
-            # Update existing fine amount
+            # Update existing fine amount and date
             existing_fine.Amount = fine_amount
             existing_fine.Date = today
             existing_fine.save()
         else:
-            # Create new fine
+            # Create new fine if it doesn't exist
             try:
                 staff = Staff.objects.first()
                 if staff and borrow.student:

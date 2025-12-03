@@ -1,6 +1,13 @@
 // API Base URL - adjust this to your Django server URL
 const API_BASE_URL = 'http://localhost:8000/api';
 
+// Global state for pagination
+let currentSearchQuery = null;
+let currentOffset = 0;
+let hasMoreResults = false;
+let totalResults = 0;
+let isLoadingMore = false;
+
 document.addEventListener("DOMContentLoaded", () => {
     highlightActiveNav();
     setupAuthorFilters();
@@ -222,9 +229,15 @@ async function performSearch() {
     
     if (!query) {
         console.log('[SEARCH] Empty query, loading all books');
+        currentSearchQuery = null;
+        currentOffset = 0;
         loadAllBooks();
         return;
     }
+    
+    // Reset pagination for new search
+    currentSearchQuery = query;
+    currentOffset = 0;
     
     const searchInfo = document.getElementById('searchInfo');
     const clearButton = document.getElementById('clearSearch');
@@ -242,7 +255,7 @@ async function performSearch() {
             controller.abort();
         }, 30000); // 30 second timeout
         
-        const searchUrl = `${API_BASE_URL}/books/search/?q=${encodeURIComponent(query)}`;
+        const searchUrl = `${API_BASE_URL}/books/search/?q=${encodeURIComponent(query)}&limit=50&offset=${currentOffset}`;
         console.log('[SEARCH] Fetching URL:', searchUrl);
         console.log('[SEARCH] Fetch started at:', new Date().toISOString());
         
@@ -275,11 +288,19 @@ async function performSearch() {
             resultsLength: data.results ? data.results.length : 0
         });
         
-        console.log('[SEARCH] Calling displayBooks with', data.results.length, 'books');
-        displayBooks(data.results);
+        // Update global state
+        totalResults = data.total;
+        hasMoreResults = data.has_more;
         
-        searchInfo.textContent = `"${query}" için ${data.count} sonuç bulundu.`;
+        console.log('[SEARCH] Calling displayBooks with', data.results.length, 'books');
+        displayBooks(data.results, false);
+        
+        searchInfo.textContent = `"${query}" için ${data.total} sonuç bulundu.`;
         clearButton.style.display = 'inline-block';
+        
+        // Show or hide load more button
+        updateLoadMoreButton();
+        
         console.log('[SEARCH] Search completed successfully');
         
     } catch (error) {
@@ -304,6 +325,10 @@ async function loadAllBooks() {
     const searchInfo = document.getElementById('searchInfo');
     const booksGrid = document.getElementById('booksGrid');
     
+    // Reset pagination
+    currentSearchQuery = null;
+    currentOffset = 0;
+    
     booksGrid.innerHTML = '<p>Kitaplar yükleniyor...</p>';
     
     try {
@@ -312,7 +337,7 @@ async function loadAllBooks() {
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
         
         // Load only first 50 books for better performance
-        const response = await fetch(`${API_BASE_URL}/books/?limit=50`, {
+        const response = await fetch(`${API_BASE_URL}/books/?limit=50&offset=${currentOffset}`, {
             credentials: 'include',
             signal: controller.signal
         });
@@ -325,9 +350,16 @@ async function loadAllBooks() {
         
         const data = await response.json();
         
-        displayBooks(data.results);
-        const totalInfo = data.total ? ` (Toplam ${data.total} kitaptan ${data.count} tanesi gösteriliyor)` : '';
+        // Update global state
+        totalResults = data.total || data.count;
+        hasMoreResults = data.has_more || false;
+        
+        displayBooks(data.results, false);
+        const totalInfo = data.total ? ` (Toplam ${data.total} kitap)` : '';
         searchInfo.textContent = `Kitaplar gösteriliyor${totalInfo}.`;
+        
+        // Show or hide load more button
+        updateLoadMoreButton();
         
     } catch (error) {
         console.error('Failed to load books:', error);
@@ -339,8 +371,8 @@ async function loadAllBooks() {
     }
 }
 
-function displayBooks(books) {
-    console.log('[DISPLAY] displayBooks called with', books.length, 'books');
+function displayBooks(books, append = false) {
+    console.log('[DISPLAY] displayBooks called with', books.length, 'books, append:', append);
     const booksGrid = document.getElementById('booksGrid');
     
     if (!booksGrid) {
@@ -349,8 +381,10 @@ function displayBooks(books) {
     }
     
     if (!books || books.length === 0) {
-        console.log('[DISPLAY] No books to display');
-        booksGrid.innerHTML = '<p>Kitap bulunamadı.</p>';
+        if (!append) {
+            console.log('[DISPLAY] No books to display');
+            booksGrid.innerHTML = '<p>Kitap bulunamadı.</p>';
+        }
         return;
     }
     
@@ -358,7 +392,7 @@ function displayBooks(books) {
     console.log('[DISPLAY] Generating HTML for books...');
     
     try {
-        booksGrid.innerHTML = books.map(book => {
+        const booksHTML = books.map(book => {
         const availabilityBadge = book.available 
             ? '<span class="availability-badge available">Mevcut</span>'
             : '<span class="availability-badge unavailable">Ödünç Verilmiş</span>';
@@ -390,11 +424,20 @@ function displayBooks(books) {
             </article>
         `;
         }).join('');
+        
+        if (append) {
+            booksGrid.innerHTML += booksHTML;
+        } else {
+            booksGrid.innerHTML = booksHTML;
+        }
+        
         console.log('[DISPLAY] HTML generated and inserted into DOM');
         console.log('[DISPLAY] Final booksGrid innerHTML length:', booksGrid.innerHTML.length);
     } catch (error) {
         console.error('[DISPLAY] Error generating HTML:', error);
-        booksGrid.innerHTML = '<p>Kitaplar görüntülenirken bir hata oluştu.</p>';
+        if (!append) {
+            booksGrid.innerHTML = '<p>Kitaplar görüntülenirken bir hata oluştu.</p>';
+        }
     }
 }
 
@@ -760,4 +803,100 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ===== Pagination Functions =====
+
+function updateLoadMoreButton() {
+    let loadMoreContainer = document.getElementById('loadMoreContainer');
+    
+    // Create container if it doesn't exist
+    if (!loadMoreContainer) {
+        loadMoreContainer = document.createElement('div');
+        loadMoreContainer.id = 'loadMoreContainer';
+        loadMoreContainer.style.textAlign = 'center';
+        loadMoreContainer.style.marginTop = '2rem';
+        loadMoreContainer.style.marginBottom = '2rem';
+        
+        const booksGrid = document.getElementById('booksGrid');
+        if (booksGrid && booksGrid.parentNode) {
+            booksGrid.parentNode.insertBefore(loadMoreContainer, booksGrid.nextSibling);
+        }
+    }
+    
+    if (hasMoreResults && !isLoadingMore) {
+        const currentlyShown = currentOffset + 50;
+        loadMoreContainer.innerHTML = `
+            <p style="color: #52606d; margin-bottom: 1rem;">
+                ${currentlyShown} / ${totalResults} kitap gösteriliyor
+            </p>
+            <button onclick="loadMoreBooks()" style="
+                background-color: #1d3557;
+                color: #f1faee;
+                border: none;
+                border-radius: 8px;
+                padding: 0.75rem 2rem;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            " onmouseover="this.style.backgroundColor='#2d4567'" 
+               onmouseout="this.style.backgroundColor='#1d3557'">
+                Daha Fazla Yükle
+            </button>
+        `;
+    } else if (isLoadingMore) {
+        loadMoreContainer.innerHTML = `
+            <p style="color: #52606d;">Yükleniyor...</p>
+        `;
+    } else {
+        loadMoreContainer.innerHTML = '';
+    }
+}
+
+async function loadMoreBooks() {
+    if (isLoadingMore || !hasMoreResults) {
+        return;
+    }
+    
+    isLoadingMore = true;
+    updateLoadMoreButton();
+    
+    try {
+        currentOffset += 50;
+        
+        let url;
+        if (currentSearchQuery) {
+            // Loading more search results
+            url = `${API_BASE_URL}/books/search/?q=${encodeURIComponent(currentSearchQuery)}&limit=50&offset=${currentOffset}`;
+        } else {
+            // Loading more all books
+            url = `${API_BASE_URL}/books/?limit=50&offset=${currentOffset}`;
+        }
+        
+        const response = await fetch(url, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Update global state
+        hasMoreResults = data.has_more || false;
+        totalResults = data.total || totalResults;
+        
+        // Append new books to existing ones
+        displayBooks(data.results, true);
+        
+        isLoadingMore = false;
+        updateLoadMoreButton();
+        
+    } catch (error) {
+        console.error('Failed to load more books:', error);
+        isLoadingMore = false;
+        updateLoadMoreButton();
+        alert('Daha fazla kitap yüklenirken bir hata oluştu.');
+    }
 }
