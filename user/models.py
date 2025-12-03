@@ -9,9 +9,9 @@ class User(models.Model):
 
     User_ID = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=50)
-    Email = models.CharField(max_length=50)
-    Phone = models.CharField(max_length=10)
-    Username = models.CharField(max_length=50)
+    Email = models.CharField(max_length=50, unique=True)
+    Phone = models.CharField(max_length=10, unique=True)
+    Username = models.CharField(max_length=50, unique=True)
     Password = models.CharField(max_length=128)  # Increased for hashed passwords
 
     Type = models.CharField(max_length=10, choices=USER_TYPES)
